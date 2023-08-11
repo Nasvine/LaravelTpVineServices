@@ -1,0 +1,84 @@
+Pour créer une commande on fait, php artisan make:commande <NameofCommand> .
+Cela va créer dans console un dossier Commands ausein duquel vous verrez votre commande .
+
+
+Voir ici un exemple de commande qui creer des utilisateurs dans la base de donnée
+
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Console\Command;
+
+class CreateUserCommand extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+
+
+     /* Dans la variable signature on definit le nom de la commande qui sera tapé et les arguments à ajouter 
+     
+     Pour lancer cette commande je ferai php artisan user:create Admin admin@gmail.com 1235648
+     
+     */
+    protected $signature = 'user:create {--count=}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+
+     /* 
+       Dans la variable description on fait la description de la commande
+     
+     */
+    protected $description = 'Creates a new user';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+
+        /* 
+          C'est dans la méthode handle qu'ait défini ce que faire notre Commande
+        */
+
+        /* 
+          Récupération des données passées en paramètre lors de l'exécution de la commande
+          $name = $this->argument('name');
+        */
+
+        $count = $this->option('count');
+
+        $bar = $this->output->createProgressBar($count);
+
+        $bar->start();
+        
+        for($i=0; $i <= $count; $i++){
+            
+            $name = $this->argument('name');
+            $email = $this->argument('email');
+            $password = $this->argument('password') ?? Str::random(12);
+    
+            User::create(
+                [
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => bcrypt($password),
+                ]);
+
+                $bar->advance();
+            }
+            
+        $bar->finish();
+            /* Message retourner */
+        $this->info('Successfully Created: '.$count.'Users');
+    }
+}
